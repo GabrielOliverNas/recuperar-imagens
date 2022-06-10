@@ -1,4 +1,4 @@
-package com.example.recuperarimagens.diretorio;
+package com.example.recuperarimagens.service;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
@@ -21,7 +21,7 @@ import java.util.Objects;
 
 @Slf4j
 @Component
-public class Disco {
+public class DiscoService {
   private static final String SALVAR_IMAGENS_ANO =
       "C://Users//gabriel.nascimento//Pictures//Camera Roll//fotos//ano//";
   private static final String SALVAR_IMAGENS_MES =
