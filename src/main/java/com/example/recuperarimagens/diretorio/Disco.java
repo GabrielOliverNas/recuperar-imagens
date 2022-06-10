@@ -32,7 +32,7 @@ public class Disco {
     compressImage();
   }
 
-  private void compressImage() throws IOException {
+  public void compressImage() throws IOException {
     Path source = Paths.get(BUSCAR_FOTO_ENDERECO.concat(BUSCAR_NOME_FOTO));
     Path target = Paths.get(ENDERECO_SALVAR_FOTO_ATUALIZADA.concat(SALVAR_NOME_FOTO_ATUALIZADA));
 
@@ -64,27 +64,4 @@ public class Disco {
 
     return bufferedImage;
   }
-
-  /*
-  * Random r = new Random();
-
-    /*for (int col = 0; col < w; col++) {
-      for (int lin = 0; lin < h; lin++) {
-        pixels[w * lin + col] = new Color(r.nextInt(255), col % 255, lin % 255).getRGB();
-      }
-    }*/
-
-  /*private void salvar(String diretorio, MultipartFile multipartFile) {
-    Path diretorioPath =
-        Paths.get(diretorio,Objects.requireNonNull(multipartFile.getOriginalFilename()));
-    Path arquivoPath =
-        diretorioPath.resolve(Objects.requireNonNull(multipartFile.getOriginalFilename()));
-
-    try {
-      Files.createDirectories(diretorioPath);
-      multipartFile.transferTo(arquivoPath.toFile());
-    } catch (Exception e) {
-      throw new RuntimeException("Problemas ao salvar o arquivo");
-    }
-  }*/
 }
