@@ -15,14 +15,19 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.Arrays;
+import java.util.List;
 import java.util.Objects;
 
 @Slf4j
 @Component
 public class Disco {
-  private static final String ENDERECO_SALVAR_FOTO_ATUALIZADA =
-      "C://Users//gabriel.nascimento//Pictures//Camera Roll//fotos//";
-  private static final String FOTO_REDIMENSIONADA = "foto-600x480.png";
+  private static final String SALVAR_IMAGENS_ANO =
+      "C://Users//gabriel.nascimento//Pictures//Camera Roll//fotos//ano//";
+  private static final String SALVAR_IMAGENS_MES =
+      "C://Users//gabriel.nascimento//Pictures//Camera Roll//fotos//ano//meses//";
+  private static final String SALVAR_IMAGENS_DIA =
+      "C://Users//gabriel.nascimento//Pictures//Camera Roll//fotos//ano//meses//dias//";
 
   private static final String UPLOADED_FOLDER = "C://Users//gabriel.nascimento//Documents//fotos//";
 
@@ -41,13 +46,13 @@ public class Disco {
   }
 
   public String compressImage(String nomeArquivo) throws IOException {
-    final String nomeFotoExtensao = getDataNomeFoto();
+    final String nomeFotoExtensao = getNomeArquivo();
 
-    Path source = Paths.get(UPLOADED_FOLDER.concat(nomeArquivo));
-    Path target = Paths.get(ENDERECO_SALVAR_FOTO_ATUALIZADA.concat(nomeFotoExtensao));
+    Path imagemDiretorio = Paths.get(UPLOADED_FOLDER.concat(nomeArquivo));
+    Path salvarNoDiretorio = Paths.get(SALVAR_IMAGENS_ANO.concat(nomeFotoExtensao));
 
-    try (InputStream is = new FileInputStream(source.toFile())) {
-      resize(is, target, 600, 480);
+    try (InputStream arquivo = new FileInputStream(imagemDiretorio.toFile())) {
+      resize(arquivo, salvarNoDiretorio, 600, 480);
     } catch (RuntimeException e) {
       throw new RuntimeException("Não foi possivel redimencionar a foto");
     }
@@ -57,19 +62,19 @@ public class Disco {
   private static void resize(InputStream input, Path target, int width, int height)
       throws IOException {
     BufferedImage imagemDiretorio = ImageIO.read(input);
-    Image newResizedImage = imagemDiretorio.getScaledInstance(width, height, Image.SCALE_SMOOTH);
+    Image imagemReduzida = imagemDiretorio.getScaledInstance(width, height, Image.SCALE_SMOOTH);
 
     String nomeArquivo = target.getFileName().toString();
     String novaExtensao = nomeArquivo.substring(nomeArquivo.lastIndexOf(".") + 1);
 
-    final BufferedImage converterImagem = converterBufferedImage(newResizedImage);
+    final BufferedImage converterImagem = converterBufferedImage(imagemReduzida);
 
-    ImageIO.write(converterImagem, novaExtensao, target.toFile());
+    escreverImagemNoDiretorio(nomeArquivo, converterImagem, novaExtensao);
   }
 
   public static BufferedImage converterBufferedImage(Image img) {
     BufferedImage bufferedImage =
-        new BufferedImage(img.getWidth(null), img.getHeight(null), BufferedImage.TYPE_INT_ARGB);
+        new BufferedImage(img.getWidth(null), img.getHeight(null), BufferedImage.TYPE_INT_RGB);
 
     Graphics2D g = bufferedImage.createGraphics();
     g.drawImage(img, 0, 0, null);
@@ -80,12 +85,11 @@ public class Disco {
 
   public void alterarFotoPorNome(String arquivo) throws IOException {
 
-    final String nomeFotoExtensao = getDataNomeFoto();
+    final String nomeFotoExtensao = getNomeArquivo();
 
-    Path foto = Paths.get(ENDERECO_SALVAR_FOTO_ATUALIZADA.concat(arquivo));
-    Path caminho = Paths.get(ENDERECO_SALVAR_FOTO_ATUALIZADA.concat(nomeFotoExtensao));
+    Path foto = Paths.get(SALVAR_IMAGENS_ANO.concat(arquivo));
 
-    String nomeArquivo = caminho.getFileName().toString();
+    String nomeArquivo = foto.getFileName().toString();
     String novaExtensao = nomeArquivo.substring(nomeArquivo.lastIndexOf(".") + 1);
 
     try (InputStream is = new FileInputStream(foto.toFile())) {
@@ -93,13 +97,13 @@ public class Disco {
 
       final BufferedImage novaImagem = getBordaPreta(imagemDiretorio);
 
-      ImageIO.write(novaImagem, novaExtensao, caminho.toFile());
+      escreverImagemNoDiretorio(nomeFotoExtensao, novaImagem, novaExtensao);
     } catch (RuntimeException e) {
       throw new RuntimeException("Não foi possivel redimencionar a foto");
     }
   }
 
-  private static String getDataNomeFoto() {
+  private static String getNomeArquivo() {
     final DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy/MM/dd HH:mm:ss");
     final LocalDateTime now = LocalDateTime.now();
     final String extensao = ".png";
@@ -134,5 +138,22 @@ public class Disco {
     g.dispose();
 
     return novaImagem;
+  }
+
+  private static List<String> escreverImagemNoDiretorio(
+      String nomeArquivo, BufferedImage img, String novaExtensao) {
+    final List<String> diretorios =
+        Arrays.asList(SALVAR_IMAGENS_ANO, SALVAR_IMAGENS_MES, SALVAR_IMAGENS_DIA);
+
+    diretorios.forEach(
+        diretorio -> {
+          try {
+            final Path novoDiretorio = Paths.get(diretorio.concat(nomeArquivo));
+            ImageIO.write(img, novaExtensao, novoDiretorio.toFile());
+          } catch (IOException e) {
+            e.printStackTrace();
+          }
+        });
+    return diretorios;
   }
 }
