@@ -2,9 +2,6 @@ package com.example.recuperarimagens.controller;
 
 import com.example.recuperarimagens.diretorio.Disco;
 import org.springframework.beans.factory.annotation.Autowired;
-<<<<<<< Updated upstream
-import org.springframework.web.bind.annotation.*;
-=======
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -21,10 +18,11 @@ public class RecuperarImagem {
 
   @Autowired private Disco disco;
 
-  @PostMapping
-  public ResponseEntity<?> teste(@RequestParam MultipartFile imagem) throws IOException {
-    disco.salvarFotos(imagem);
-    disco.compressImage();
+  @PostMapping()
+  public ResponseEntity upload(@RequestParam MultipartFile imagem) throws IOException {
+    final String nomeArquivo = disco.salvarFotos(imagem);
+    final String nomeArquivoComExtensao = disco.compressImage(nomeArquivo);
+    disco.alterarFotoPorNome(nomeArquivoComExtensao);
 
     return new ResponseEntity<>(HttpStatus.NO_CONTENT);
   }
